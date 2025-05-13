@@ -1,0 +1,17 @@
+[package]
+name = "idlefactorygame2"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+console_error_panic_hook = "0.1.7"
+leptos = { version = "0.8", features = ["csr"] }
+thiserror = "2.0.12"
+
+
+[dependencies.malachite]
+version = "0.6.0"
+
+[dependencies.web-sys]
+version = "0.3.77"
+features = ['Window', "Storage"]
