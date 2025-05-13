@@ -7,6 +7,10 @@ edition = "2024"
 console_error_panic_hook = "0.1.7"
 leptos = { version = "0.8", features = ["csr"] }
 thiserror = "2.0.12"
+async-std = "1.13.1"
+
+[dependencies.leptos_router]
+version = "0.8"
 
 
 [dependencies.malachite]
