@@ -10,7 +10,7 @@ fn main() {
     console_error_panic_hook::set_once();
 
     mount_to_body(|| view! {
-        <Router>
+        <Router base="idlefactorygame2">
             <main>
                 <Routes fallback=|| "Not found.">
                     <Route path=path!("/") view=NumberGoUp />    
