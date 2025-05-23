@@ -15,6 +15,7 @@ version = "0.8"
 
 [dependencies.malachite]
 version = "0.6.0"
+features = ["rationals", "naturals_and_integers", "serde"]
 
 [dependencies.web-sys]
 version = "0.3.77"

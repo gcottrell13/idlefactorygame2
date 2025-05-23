@@ -1115,6 +1115,7 @@ dependencies = [
  "malachite-base",
  "malachite-nz",
  "malachite-q",
+ "serde",
 ]
 
 [[package]]
