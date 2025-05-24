@@ -15,7 +15,12 @@ use crate::types::RuntimeState;
 pub fn FactoryApp() -> impl IntoView {
     let state = load().unwrap_or_else(RuntimeState::default);
 
-    
+    view! {
+        <div>
+            <h1>"Factory application:"</h1>
+            <h2>{state.current_version.to_string()}</h2>
+        </div>
+    }
 }
 
 
@@ -40,7 +45,7 @@ fn save<T>(state: &RuntimeState) {
 
 macro_rules! load {
     ($storage:ident, $name: ident) => {
-        serde_json::from_str($storage.get_item(stringify!($name)).unwrap_or_else(|_| Some("".to_string())).unwrap().as_str())?
+        serde_json::from_str($storage.get_item(stringify!($name)).unwrap_or_else(|_| Some("".to_string())).unwrap_or("".into()).as_str())?
     };
 }
 fn load() -> Result<RuntimeState, serde_json::Error> {
