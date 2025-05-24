@@ -5,6 +5,7 @@ use leptos_router::path;
 mod components;
 mod types;
 mod content;
+mod engine;
 
 use components::NumberGoUp;
 

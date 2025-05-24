@@ -1,46 +1,53 @@
 use malachite::Integer;
 use crate::types::runtime_state::{Features, ItemState, RecipeState};
-use malachite::base::num::basic::traits::{One};
-use malachite::base::num::arithmetic::traits::{Pow};
+use serde::{Deserialize, Serialize};
 
-pub struct OutputWeight<T>(pub Vec<ItemAmount<T>>, pub f32);
+#[derive(Hash, PartialEq, Eq, Serialize, Deserialize, Debug)]
+pub struct RecipeName(pub String);
 
-pub struct ItemAmount<T>(pub T, pub Integer);
+#[derive(Hash, PartialEq, Eq, Serialize, Deserialize, Debug)]
+pub struct ItemName(pub String);
+
+pub struct OutputWeight(pub Vec<ItemAmount>, pub f32);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ItemAmount(pub ItemName, pub Integer);
 
 
-pub enum Output<T> {
-    Simple(Vec<ItemAmount<T>>),
-    Weighted(Vec<OutputWeight<T>>),
+pub enum Output {
+    Simple(Vec<ItemAmount>),
+    Weighted(Vec<OutputWeight>),
 }
 
-pub struct Building<T> {
-    pub item: T,
-    pub power_per_second: Vec<ItemAmount<T>>,
+pub struct Building {
+    pub item: ItemName,
+    pub power_per_second: Option<Vec<ItemAmount>>,
+    pub crafting_time: f32,
 }
 
 pub struct ByHand {
     pub name: &'static str,
+    pub crafting_time: f32,
 }
 
 
-pub struct Recipe<T> 
-where T : Into<ItemAmount<T>> {
-    pub name: &'static str,
+pub struct Recipe {
+    pub name: RecipeName,
     pub description: &'static str,
-    pub inputs: Vec<ItemAmount<T>>,
-    pub outputs: Output<T>,
-    pub buildings: Option<Vec<Building<T>>>,
+    pub inputs: Vec<ItemAmount>,
+    pub outputs: Output,
+    pub buildings: Option<Vec<Building>>,
     pub by_hand: Option<ByHand>,
     /// used to update options on this recipe:
     /// FnMut(delta f32, item state, mutable recipe state)
-    pub on_tick: Option<Box<dyn FnMut(f32, &ItemState<T>, &mut RecipeState<T>)>>,
+    pub on_tick: Option<Box<dyn FnMut(f32, &ItemState, &mut RecipeState)>>,
     pub on_hand_buy_features_unlocked: Option<Vec<Features>>,
 }
 
 macro_rules! recipe {
     (name=$name: expr, description=$description: literal, inputs=[$($input: expr),+] , outputs=$outputs: expr, ) => {
         // provided: name, description, inputs, outputs. no buildings or by_hand, so by_hand set to default: "Create"
-        recipe!(name=$name, description=$description, inputs=[$($input),+], outputs=$outputs, by_hand=Some(ByHand{name: "Create"}), )
+        recipe!(name=$name, description=$description, inputs=[$($input),+], outputs=$outputs, by_hand=Some(ByHand{name: "Create", crafting_time: 1f32}), )
     };
     (name=$name: expr, description=$description: literal, inputs=[$($input: expr),+], outputs=$outputs: expr, buildings=$buildings:expr,) => {
         // provided: name, description, inputs, outputs, buildings. by_hand set to None
@@ -71,7 +78,7 @@ macro_rules! recipe {
     on_tick=$on_tick:expr, on_hand_buy_features_unlocked=$on_hand_buy_features_unlocked:expr) => {
         // provided: all
         Recipe {
-            name: $name,
+            name: $name.into(),
             description: $description,
             inputs: vec![$($input),+],
             outputs: $outputs,
@@ -85,18 +92,18 @@ macro_rules! recipe {
 
 macro_rules! simple {
     [$($input: expr),+] => {
-        Output::Simple(vec![$(ItemAmount($input, Integer::ONE)),+])
+        Output::Simple(vec![$(ItemAmount($input.into(), Integer::ONE)),+])
     };
 }
 macro_rules! amount {
     ($base: literal, $exponent: literal, $input: expr) => {
-        ItemAmount($input, Integer::from($base) * Integer::from(10).pow($exponent))
+        ItemAmount($input.into(), Integer::from($base) * Integer::from(10).pow($exponent))
     };
     ($amount: literal, $input: expr) => {
-        ItemAmount($input, Integer::from($amount))
+        ItemAmount($input.into(), Integer::from($amount))
     };
     ($input: expr) => {
-        ItemAmount($input, Integer::ONE)
+        ItemAmount($input.into(), Integer::ONE)
     };
 }
 
@@ -111,32 +118,8 @@ pub(crate) use amount;
 pub(crate) use simple;
 pub(crate) use weighted;
 
-
-enum TestEnum {
-    A,
-    B,
-}
-use std::ops;
-impl ops::Mul<i32> for TestEnum {
-    type Output = ItemAmount<TestEnum>;
-    fn mul(self, rhs: i32) -> Self::Output {
-        ItemAmount(self, Integer::from(rhs))
+impl Into<RecipeName> for &str {
+    fn into(self) -> RecipeName {
+        RecipeName(self.to_string())
     }
-}
-impl Into<ItemAmount<TestEnum>> for TestEnum {
-    fn into(self) -> ItemAmount<TestEnum> {
-        ItemAmount(self, Integer::ONE)
-    }
-}
-
-fn test() {
-    let a = recipe!(
-        name="A",
-        description="there",
-        inputs=[amount!(100, 10, TestEnum::A), amount!(155, TestEnum::B)],
-        outputs=weighted!{
-            1: TestEnum::A * 2
-            2: TestEnum::B, TestEnum::A
-        },
-    );
-}
+} 
