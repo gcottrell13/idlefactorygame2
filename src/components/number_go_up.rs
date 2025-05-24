@@ -14,7 +14,7 @@ pub fn NumberGoUp() -> impl IntoView {
     let window = window().expect("window must exist");
     let storage = window.local_storage().expect("storage must exist").unwrap();
     let value = match storage.get("value").unwrap() {
-        Some(value) => Integer::from_string_base(10, &value.to_string()).unwrap(),
+        Some(value) => Integer::from_string_base(10, &value).unwrap(),
         None => Integer::from(0u8),
     };
 
@@ -54,7 +54,7 @@ pub fn NumberGoUp() -> impl IntoView {
         loop {
             task::sleep(Duration::from_secs(20)).await;
             let current = incrementers.get_untracked().get(0).unwrap().clone();
-            storage.set("value", &current.to_string().to_string());
+            storage.set("value", &current.to_string().to_string()).expect("TODO: panic message");
         }
     });
 

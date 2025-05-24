@@ -1,9 +1,8 @@
 name: Release to Github Pages
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  release:
+    types: [published]
 
 permissions:
   contents: write # for committing to gh-pages branch.
@@ -30,6 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # repo checkout
 
+      - name: Update version.txt
+        run: echo ${{ github.event.release.tag_name }} > version.txt
+
       # Install Rust Nightly Toolchain, with Clippy & Rustfmt
       - name: Install nightly Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -53,9 +55,9 @@ jobs:
 
       - name: Build with Trunk
         # "${GITHUB_REPOSITORY#*/}" evaluates into the name of the repository
-        # using --public-url something will allow trunk to modify all the href paths like from favicon.ico to repo_name/favicon.ico .
+        # using --public-url something will allow trunk to modify all the href paths like from favicon.png to repo_name/favicon.png .
         # this is necessary for github pages where the site is deployed to username.github.io/repo_name and all files must be requested
-        # relatively as favicon.ico. if we skip public-url option, the href paths will instead request username.github.io/favicon.ico which
+        # relatively as favicon.png. if we skip public-url option, the href paths will instead request username.github.io/favicon.png which
         # will obviously return error 404 not found.
         run: ./trunk build --release --public-url "${GITHUB_REPOSITORY#*/}"
 
