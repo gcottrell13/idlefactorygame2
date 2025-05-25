@@ -26,3 +26,6 @@ features = ["rationals", "naturals_and_integers", "serde", "enable_serde"]
 [dependencies.web-sys]
 version = "0.3.77"
 features = ['Window', "Storage"]
+
+[dependencies.base64]
+version = "0.22.1"

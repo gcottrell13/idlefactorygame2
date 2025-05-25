@@ -1,19 +1,19 @@
-use std::collections::HashMap;
-use malachite::base::num::arithmetic::traits::Pow;
-use crate::types::{*};
+use crate::types::*;
 use malachite::Integer;
-use malachite::base::num::basic::traits::{One};
-use std::ops;
+use malachite::base::num::arithmetic::traits::Pow;
+use malachite::base::num::basic::traits::One;
 use malachite::base::strings::ToDebugString;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::ops;
+use std::sync::Arc;
 
-#[derive(Hash, Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
-pub enum Item {
+#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
+enum Item {
     A,
     B,
     C,
 }
-
 
 impl ops::Mul<i32> for Item {
     type Output = ItemAmount;
@@ -28,13 +28,12 @@ impl Into<ItemAmount> for Item {
 }
 impl Into<ItemName> for Item {
     fn into(self) -> ItemName {
-        ItemName(self.to_debug_string())
+        ItemName(self.to_debug_string().into())
     }
 }
 
-
-pub fn get_recipes() -> Vec<Recipe> {
-    vec![
+pub fn get_recipes() -> HashMap<RecipeName, Arc<Recipe>> {
+    HashMap::from_iter(vec! [
         recipe!(
             name="A",
             description="item A",
@@ -55,21 +54,18 @@ pub fn get_recipes() -> Vec<Recipe> {
                 1: Item::A
             ),
         ),
-    ]
+    ].drain(..).map(|item| (item.name.clone(), item)))
 }
 
-macro_rules! hash {
-    {$($key: expr => $item: expr,)+} => {
-        HashMap::from([
-            ($($key, $item),+),
-        ])
-    };
-}
-pub fn get_item_stats() -> HashMap<Item, ItemStats> {
-    hash!{
-        Item::A => item_stats!(
+pub fn get_item_stats() -> HashMap<ItemName, Arc<ItemStats>> {
+    HashMap::from_iter(vec! [
+        item_stats!(
             name=Item::A,
             sprite_path="sprites/iron-bar.png"
         ),
-    }
+        item_stats!(
+            name=Item::B,
+            sprite_path="sprites/iron-gear.png"
+        ),
+    ].drain(..).map(|item| (item.name.clone(), item)))
 }

@@ -815,6 +815,7 @@ name = "idlefactorygame2"
 version = "0.1.0"
 dependencies = [
  "async-std",
+ "base64",
  "console_error_panic_hook",
  "leptos",
  "leptos_router",

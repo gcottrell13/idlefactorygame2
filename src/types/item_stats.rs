@@ -1,5 +1,7 @@
+use std::sync::Arc;
+use base64::prelude::*;
 use crate::types::ItemName;
-use crate::types::runtime_state::ItemState;
+use crate::types::runtime_state_1::ItemState;
 
 type Tick = Option<Box<&'static dyn Fn(f32, &mut ItemState)>>;
 
@@ -12,21 +14,22 @@ macro_rules! item_stats {
     }
 }
 
+
 pub(crate) use item_stats;
 
 pub struct ItemStats {
-    item: ItemName,
-    sprite_content: &'static [u8],
+    pub name: ItemName,
+    pub sprite_content: String,
     /// used to update the amount of this item at all times, even when there are no buildings
-    on_tick: Tick,
+    pub on_tick: Tick,
 }
 
 impl ItemStats {
-    pub fn new(item: ItemName, sprite_content: &'static [u8], on_tick: Option<&'static dyn Fn(f32, &mut ItemState)>) -> ItemStats {
-        ItemStats {
-            item,
-            sprite_content,
+    pub fn new(name: ItemName, sprite_content: &'static [u8], on_tick: Option<&'static dyn Fn(f32, &mut ItemState)>) -> Arc<ItemStats> {
+        Arc::new(ItemStats {
+            name,
+            sprite_content: "data:image/png;base64,".to_string() + BASE64_STANDARD.encode(sprite_content).as_str(),
             on_tick: on_tick.map(|f| Box::new(f)),
-        }
+        })
     }
 }

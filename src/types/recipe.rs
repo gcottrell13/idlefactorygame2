@@ -1,16 +1,16 @@
 use malachite::Integer;
-use crate::types::runtime_state::{Features, ItemState, RecipeState};
+use crate::types::runtime_state_1::{Features, ItemState, RecipeState};
 use serde::{Deserialize, Serialize};
 
-#[derive(Hash, PartialEq, Eq, Serialize, Deserialize, Debug)]
+#[derive(Hash, PartialEq, Eq, Serialize, Deserialize, Debug, Clone)]
 pub struct RecipeName(pub String);
 
-#[derive(Hash, PartialEq, Eq, Serialize, Deserialize, Debug)]
+#[derive(Hash, PartialEq, Eq, Serialize, Deserialize, Debug, Clone)]
 pub struct ItemName(pub String);
 
 pub struct OutputWeight(pub Vec<ItemAmount>, pub f32);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ItemAmount(pub ItemName, pub Integer);
 
 
@@ -40,7 +40,7 @@ pub struct Recipe {
     pub by_hand: Option<ByHand>,
     /// used to update options on this recipe:
     /// FnMut(delta f32, item state, mutable recipe state)
-    pub on_tick: Option<Box<dyn FnMut(f32, &ItemState, &mut RecipeState)>>,
+    // pub on_tick: Option<Box<dyn FnMut(f32, &ItemState, &mut RecipeState)>>,
     pub on_hand_buy_features_unlocked: Option<Vec<Features>>,
 }
 
@@ -77,16 +77,16 @@ macro_rules! recipe {
     buildings=$buildings:expr, by_hand=$by_hand:expr,
     on_tick=$on_tick:expr, on_hand_buy_features_unlocked=$on_hand_buy_features_unlocked:expr) => {
         // provided: all
-        Recipe {
+        Arc::new(Recipe {
             name: $name.into(),
             description: $description,
             inputs: vec![$($input),+],
             outputs: $outputs,
             buildings: $buildings,
             by_hand: $by_hand,
-            on_tick: $on_tick,
+            // on_tick: $on_tick,
             on_hand_buy_features_unlocked: $on_hand_buy_features_unlocked,
-        }
+        })
     };
 }
 
@@ -108,7 +108,7 @@ macro_rules! amount {
 }
 
 macro_rules! weighted {
-    {$($weight: literal: $($item: expr),+)+} => {
+    {$($weight:literal: $($item: expr),+)+} => {
         Output::Weighted(vec![$(OutputWeight(vec![$($item.into()),+], $weight as f32)),+])
     };
 }
@@ -118,8 +118,9 @@ pub(crate) use amount;
 pub(crate) use simple;
 pub(crate) use weighted;
 
+
 impl Into<RecipeName> for &str {
     fn into(self) -> RecipeName {
         RecipeName(self.to_string())
     }
-} 
+}
