@@ -31,41 +31,60 @@ impl Into<ItemName> for Item {
         ItemName(self.to_debug_string().into())
     }
 }
-
-pub fn get_recipes() -> HashMap<RecipeName, Arc<Recipe>> {
-    HashMap::from_iter(vec! [
-        recipe!(
-            name="A",
-            description="item A",
-            inputs=[amount!(Item::A)],
-            outputs=simple![Item::A, Item::B],
-        ),
-        recipe!(
-            name="buy A",
-            description="item A",
-            inputs=[amount!(1, 10, Item::A)],
-            outputs=simple![Item::A, Item::B, Item::C],
-        ),
-        recipe!(
-            name="A #2",
-            description="item A",
-            inputs=[amount!(Item::A)],
-            outputs=weighted!(
-                1: Item::A
-            ),
-        ),
-    ].drain(..).map(|item| (item.name.clone(), item)))
+impl Into<RecipeName> for Item {
+    fn into(self) -> RecipeName {
+        RecipeName(self.to_debug_string().into())
+    }
+}
+impl Into<Option<ItemName>> for Item {
+    fn into(self) -> Option<ItemName> {
+        Some(ItemName(self.to_debug_string().into()))
+    }
 }
 
-pub fn get_item_stats() -> HashMap<ItemName, Arc<ItemStats>> {
-    HashMap::from_iter(vec! [
-        item_stats!(
-            name=Item::A,
-            sprite_path="sprites/iron-bar.png"
-        ),
-        item_stats!(
-            name=Item::B,
-            sprite_path="sprites/iron-gear.png"
-        ),
-    ].drain(..).map(|item| (item.name.clone(), item)))
+pub fn get_recipes() -> RecipeInfo {
+    Arc::new(HashMap::from_iter(
+        vec![
+            new!(
+                Recipe,
+                name: Item::A,
+                image: Item::A,
+                description: "item A",
+                inputs: vec![amount!(Item::A)],
+                outputs: simple![Item::A, Item::B],
+            ),
+            new!(
+                Recipe,
+                name: "buy A",
+                image: Item::A,
+                description: "item A",
+                inputs: vec![amount!(1, 10, Item::A)],
+                outputs: simple![Item::A, Item::B, Item::C],
+            ),
+            new!(
+                Recipe,
+                name:"B #2",
+                image: Item::B,
+                description: "item B",
+                inputs: vec![amount!(Item::A)],
+                outputs:weighted!(
+                    1: Item::B
+                ),
+            ),
+        ]
+        .drain(..)
+        .map(|item| (item.name.clone(), item)),
+    ))
+}
+
+
+pub fn get_item_info() -> ItemInfo {
+    Arc::new(HashMap::from_iter(
+        vec![
+            item_stats!(name = Item::A, sprite_path = "sprites/iron-bar.png"),
+            item_stats!(name = Item::B, sprite_path = "sprites/iron-gear.png"),
+        ]
+        .drain(..)
+        .map(|item| (item.name.clone(), item)),
+    ))
 }
