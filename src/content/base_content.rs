@@ -60,6 +60,7 @@ pub fn get_recipes() -> RecipeInfo {
                 description: "item A",
                 inputs: vec![amount!(1, 10, Item::A)],
                 outputs: simple![Item::A, Item::B, Item::C],
+                by_hand: new!(ByHand, name: "Buy one", button_class: "red-button", ),
             ),
             new!(
                 Recipe,

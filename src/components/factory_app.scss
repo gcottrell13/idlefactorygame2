@@ -1,0 +1,12 @@
+@import "color";
+
+.app-name {
+  font-size: large;
+  color: $headline-color;
+
+  span {
+    font-size: 10px;
+    color: grey;
+    margin-left: 5px;
+  }
+}

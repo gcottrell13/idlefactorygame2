@@ -18,15 +18,18 @@ pub enum Output {
     Weighted(Vec<OutputWeight>),
 }
 
+#[derive(Clone)]
 pub struct Building {
     pub item: ItemName,
     pub power_per_second: Option<Vec<ItemAmount>>,
     pub crafting_time: f32,
 }
 
+#[derive(Clone, Copy)]
 pub struct ByHand {
     pub name: &'static str,
-    pub crafting_time: f32,
+    // pub crafting_time: f32,
+    pub button_class: &'static str,
 }
 
 pub struct Recipe {
@@ -37,9 +40,6 @@ pub struct Recipe {
     pub outputs: Output,
     pub buildings: Option<Vec<Building>>,
     pub by_hand: Option<ByHand>,
-    /// used to update options on this recipe:
-    /// FnMut(delta f32, item state, mutable recipe state)
-    // pub on_tick: Option<Box<dyn FnMut(f32, &ItemState, &mut RecipeState)>>,
     pub on_hand_buy_features_unlocked: Option<Vec<Features>>,
 }
 
@@ -90,6 +90,16 @@ impl Default for Recipe {
             buildings: None,
             image: None,
             on_hand_buy_features_unlocked: None,
+        }
+    }
+}
+
+impl Default for ByHand {
+    fn default() -> Self {
+        ByHand {
+            name: "",
+            // crafting_time: 0.0,
+            button_class: "",
         }
     }
 }
